@@ -1,0 +1,215 @@
+-- <w> : by wleo : yoruka.id
+-- ServerScriptService > Script
+local Players = game:GetService("Players")
+
+local MOB_CAP, SPAWN_RADIUS, ATTACK_RANGE = 12, 60, 10
+local ORIGIN = Vector3.new(0, 5, 0)
+
+local QUESTS = {
+	{name = "Bandit Hunt", need = 5, xp = 150, beli = 200},
+	{name = "Brute Cleanup", need = 10, xp = 400, beli = 500},
+	{name = "Boss Rush", need = 20, xp = 1000, beli = 1500},
+}
+
+local state = {}
+local mobs = {}
+
+local function xpNeeded(level)
+	return math.floor(100 * level ^ 1.5)
+end
+
+local function addXP(plr, amount)
+	local s = state[plr]
+	if not s then return end
+	local stats = plr.leaderstats
+	s.xp += amount
+	while s.xp >= xpNeeded(stats.Level.Value) do
+		s.xp -= xpNeeded(stats.Level.Value)
+		stats.Level.Value += 1
+	end
+	stats.XP.Value = s.xp
+end
+
+local function onKill(plr)
+	local s = state[plr]
+	local q = QUESTS[s.quest]
+	if not q then return end
+	s.progress += 1
+	if s.progress >= q.need then
+		addXP(plr, q.xp)
+		plr.leaderstats.Beli.Value += q.beli
+		s.quest += 1
+		s.progress = 0
+	end
+	s.label.Text = q and QUESTS[s.quest]
+		and (QUESTS[s.quest].name .. "  " .. s.progress .. "/" .. QUESTS[s.quest].need)
+		or "All quests done"
+end
+
+local function spawnMob()
+	local m = Instance.new("Model")
+	m.Name = "Bandit"
+	local root = Instance.new("Part")
+	root.Name = "HumanoidRootPart"
+	root.Size = Vector3.new(2, 4, 1)
+	root.Color = Color3.fromRGB(180, 60, 60)
+	root.Position = ORIGIN + Vector3.new(
+		math.random(-SPAWN_RADIUS, SPAWN_RADIUS), 3,
+		math.random(-SPAWN_RADIUS, SPAWN_RADIUS))
+	root.Parent = m
+	local hum = Instance.new("Humanoid")
+	hum.MaxHealth, hum.Health = 100, 100
+	hum.WalkSpeed = 10
+	hum.Parent = m
+	m.PrimaryPart = root
+	m.Parent = workspace
+	mobs[m] = true
+
+	hum.Died:Connect(function()
+		mobs[m] = nil
+		local tag = m:FindFirstChild("LastHit")
+		if tag and tag.Value and state[tag.Value] then
+			addXP(tag.Value, 25)
+			tag.Value.leaderstats.Beli.Value += 10
+			onKill(tag.Value)
+		end
+		task.wait(1)
+		m:Destroy()
+	end)
+	return m
+end
+
+local function nearestMob(pos)
+	local best, bestD = nil, math.huge
+	for m in pairs(mobs) do
+		local r = m:FindFirstChild("HumanoidRootPart")
+		local h = m:FindFirstChildOfClass("Humanoid")
+		if r and h and h.Health > 0 then
+			local d = (r.Position - pos).Magnitude
+			if d < bestD then best, bestD = m, d end
+		end
+	end
+	return best, bestD
+end
+
+local function hit(plr, mob)
+	local hum = mob:FindFirstChildOfClass("Humanoid")
+	local tag = mob:FindFirstChild("LastHit")
+	if not tag then
+		tag = Instance.new("ObjectValue")
+		tag.Name = "LastHit"
+		tag.Parent = mob
+	end
+	tag.Value = plr
+	hum:TakeDamage(15 + plr.leaderstats.Level.Value * 2)
+end
+
+local function buildUI(plr)
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "FarmUI"
+	gui.ResetOnSpawn = false
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0, 190, 0, 90)
+	frame.Position = UDim2.new(0, 10, 0.4, 0)
+	frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+	frame.Parent = gui
+	Instance.new("UICorner", frame)
+
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, -16, 0, 40)
+	btn.Position = UDim2.new(0, 8, 0, 8)
+	btn.Text = "Auto Farm: OFF"
+	btn.TextScaled = true
+	btn.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Parent = frame
+	Instance.new("UICorner", btn)
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, -16, 0, 30)
+	label.Position = UDim2.new(0, 8, 0, 54)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextScaled = true
+	label.Text = QUESTS[1].name .. "  0/" .. QUESTS[1].need
+	label.Parent = frame
+
+	btn.Activated:Connect(function()
+		local s = state[plr]
+		s.auto = not s.auto
+		btn.Text = "Auto Farm: " .. (s.auto and "ON" or "OFF")
+		btn.BackgroundColor3 = s.auto and Color3.fromRGB(50, 170, 80) or Color3.fromRGB(170, 50, 50)
+	end)
+
+	gui.Parent = plr:WaitForChild("PlayerGui")
+	return label
+end
+
+Players.PlayerAdded:Connect(function(plr)
+	local stats = Instance.new("Folder")
+	stats.Name = "leaderstats"
+	stats.Parent = plr
+	for _, n in ipairs({"Level", "XP", "Beli"}) do
+		local v = Instance.new("IntValue")
+		v.Name = n
+		v.Value = (n == "Level") and 1 or 0
+		v.Parent = stats
+	end
+	state[plr] = {xp = 0, quest = 1, progress = 0, auto = false}
+	state[plr].label = buildUI(plr)
+end)
+
+Players.PlayerRemoving:Connect(function(plr)
+	state[plr] = nil
+end)
+
+-- mob spawner
+task.spawn(function()
+	while true do
+		local count = 0
+		for _ in pairs(mobs) do count += 1 end
+		if count < MOB_CAP then spawnMob() end
+		task.wait(1.5)
+	end
+end)
+
+-- mob chase + auto farm loop
+task.spawn(function()
+	while true do
+		for plr, s in pairs(state) do
+			local char = plr.Character
+			local root = char and char:FindFirstChild("HumanoidRootPart")
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+			if root and hum and hum.Health > 0 and s.auto then
+				local mob, dist = nearestMob(root.Position)
+				if mob then
+					if dist > ATTACK_RANGE then
+						hum:MoveTo(mob.HumanoidRootPart.Position)
+					else
+						hit(plr, mob)
+					end
+				end
+			end
+		end
+		for m in pairs(mobs) do
+			local mh = m:FindFirstChildOfClass("Humanoid")
+			local mr = m:FindFirstChild("HumanoidRootPart")
+			if mh and mr then
+				local target, td = nil, 40
+				for _, p in ipairs(Players:GetPlayers()) do
+					local r = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+					if r and (r.Position - mr.Position).Magnitude < td then
+						target, td = p, (r.Position - mr.Position).Magnitude
+					end
+				end
+				if target then
+					mh:MoveTo(target.Character.HumanoidRootPart.Position)
+					if td < 4 then
+						target.Character.Humanoid:TakeDamage(3)
+					end
+				end
+			end
+		end
+		task.wait(0.5)
+	end
+end)
