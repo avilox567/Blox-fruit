@@ -1,110 +1,105 @@
 -- ============================================================
---  GHOST FRAMEWORK v1.0 | Universal Aimbot + Silent Aim + ESP
---  Target: Roblox (Blox Fruits / Any Game)
---  Author: Ghost Research
---  Executor: Any UNC-compliant executor (Synapse X, KRNL, etc.)
+--  GHOST FRAMEWORK v2.0 | FIXED | Universal Aimbot + Silent Aim + ESP
+--  Fixed: Drawing API, drag system, metamethod hook safety,
+--         ESP cleanup, camera write guard, SelectionBox adornee
 -- ============================================================
 
--- *slides into the exploit with a cold Red Bull and raw determination*
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local Players          = game:GetService("Players")
+local RunService       = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local Camera = workspace.CurrentCamera
-local LocalPlayer = Players.LocalPlayer
+local TweenService     = game:GetService("TweenService")
+local Camera           = workspace.CurrentCamera
+local LocalPlayer      = Players.LocalPlayer
 
 -- ============================================================
 -- STATE
 -- ============================================================
 local State = {
-    AimbotEnabled   = false,
+    AimbotEnabled    = false,
     SilentAimEnabled = false,
-    ESPEnabled      = false,
-    TargetNPC       = true,
-    TargetPlayers   = true,
-    FOVRadius       = 150,
-    AimbotBone      = "Head",
-    SilentBone      = "Head",
-    AimbotSmoothing = 0.15,  -- 0 = instant snap, 1 = glacial
-    ESPBoxColor     = Color3.fromRGB(138, 43, 226),
-    ESPTextColor    = Color3.fromRGB(255, 255, 255),
-    ESPLineColor    = Color3.fromRGB(255, 0, 60),
-    ShowLines       = true,
-    ShowNames       = true,
-    ShowDist        = true,
-    ShowBoxes       = true,
-    UIOpen          = true,
+    ESPEnabled       = false,
+    TargetNPC        = true,
+    TargetPlayers    = true,
+    FOVRadius        = 150,
+    AimbotBone       = "Head",
+    AimbotSmoothing  = 0.15,
+    ShowLines        = true,
+    ShowNames        = true,
+    ShowDist         = true,
+    ShowBoxes        = true,
+    UIOpen           = true,
 }
+
+-- ============================================================
+-- SAFE EXECUTOR GLOBALS (some executors name these differently)
+-- ============================================================
+local setreadonly_  = setreadonly  or (function() end)
+local newcclosure_  = newcclosure  or function(f) return f end
 
 -- ============================================================
 -- UTILITY
 -- ============================================================
 
--- *GetClosestTarget smells like a tournament bracket — one winner, everything else dust*
+local function SafeCall(fn, ...)
+    local ok, err = pcall(fn, ...)
+    if not ok then warn("[Ghost] " .. tostring(err)) end
+end
+
+local function GetPlayerChars()
+    local t = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p.Character then t[p.Character] = true end
+    end
+    return t
+end
+
+-- *GetClosestTarget — every frame the bracket narrows to one*
 local function GetClosestTarget()
-    local bestTarget = nil
-    local bestDist   = math.huge
-    local center     = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    local best     = nil
+    local bestDist = math.huge
+    local center   = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
-    local function EvaluateChar(char, isNPC)
-        if not char or not char:FindFirstChild(State.AimbotBone) then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if not hrp or not hum or hum.Health <= 0 then return end
-
-        -- Filter team (players only)
-        if not isNPC then
-            local owner = Players:GetPlayerFromCharacter(char)
-            if owner == LocalPlayer then return end
-        end
-
+    local function Eval(char)
+        if not char then return end
         local bone = char:FindFirstChild(State.AimbotBone)
-        local screenPos, onScreen = Camera:WorldToViewportPoint(bone.Position)
+        local hrp  = char:FindFirstChild("HumanoidRootPart")
+        local hum  = char:FindFirstChildOfClass("Humanoid")
+        if not bone or not hrp or not hum or hum.Health <= 0 then return end
+
+        local sp, onScreen = Camera:WorldToViewportPoint(bone.Position)
         if not onScreen then return end
 
-        local dist2D = Vector2.new(screenPos.X, screenPos.Y) - center
-        local mag    = dist2D.Magnitude
-
-        if mag < State.FOVRadius and mag < bestDist then
-            bestDist   = mag
-            bestTarget = bone
+        local d = (Vector2.new(sp.X, sp.Y) - center).Magnitude
+        if d < State.FOVRadius and d < bestDist then
+            bestDist = d
+            best     = bone
         end
     end
 
-    -- Scan players
     if State.TargetPlayers then
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character then
-                EvaluateChar(p.Character, false)
+                Eval(p.Character)
             end
         end
     end
 
-    -- Scan NPCs (anything in workspace with Humanoid + HumanoidRootPart that isn't a player char)
     if State.TargetNPC then
-        local playerChars = {}
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p.Character then playerChars[p.Character] = true end
-        end
-
+        local pChars = GetPlayerChars()
         for _, obj in ipairs(workspace:GetDescendants()) do
-            if obj:IsA("Humanoid") then
-                local char = obj.Parent
-                if char and not playerChars[char] then
-                    EvaluateChar(char, true)
-                end
+            if obj:IsA("Humanoid") and obj.Parent and not pChars[obj.Parent] then
+                Eval(obj.Parent)
             end
         end
     end
 
-    return bestTarget
+    return best
 end
 
 -- ============================================================
 -- AIMBOT
 -- ============================================================
 
--- *the camera pivots like a hawk mid-dive — smooth, inevitable, silent*
 RunService.RenderStepped:Connect(function()
     if not State.AimbotEnabled then return end
     if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then return end
@@ -112,117 +107,118 @@ RunService.RenderStepped:Connect(function()
     local target = GetClosestTarget()
     if not target then return end
 
-    local targetPos = Camera:WorldToViewportPoint(target.Position)
-    local currentCFrame = Camera.CFrame
-
-    -- Spherical lerp toward target
-    local targetCFrame = CFrame.lookAt(
-        currentCFrame.Position,
-        target.Position
-    )
-
-    Camera.CFrame = currentCFrame:Lerp(targetCFrame, State.AimbotSmoothing)
+    -- *camera pivots like a hawk mid-dive — smooth, committed, silent*
+    SafeCall(function()
+        local cur    = Camera.CFrame
+        local tgt    = CFrame.lookAt(cur.Position, target.Position)
+        Camera.CFrame = cur:Lerp(tgt, math.clamp(State.AimbotSmoothing, 0.01, 1))
+    end)
 end)
 
 -- ============================================================
--- SILENT AIM  (projectile redirection via __namecall hook)
+-- SILENT AIM — __namecall hook with full pcall safety
 -- ============================================================
 
--- *silent aim is a liar — it wears your bullet's face and sends it somewhere else*
-local mt        = getrawmetatable(game)
-local oldIndex  = mt.__namecall
-setreadonly(mt, false)
+-- *silent aim is a liar — it wears your bullet's face and mails it to someone else*
+local hookOk = pcall(function()
+    local mt     = getrawmetatable(game)
+    local oldNC  = mt.__namecall
+    setreadonly_(mt, false)
 
-mt.__namecall = newcclosure(function(self, ...)
-    local args   = {...}
-    local method = getnamecallmethod()
+    mt.__namecall = newcclosure_(function(self, ...)
+        local method = getnamecallmethod()
+        local args   = { ... }
 
-    if State.SilentAimEnabled and method == "FireServer" then
-        -- Hook remote events that handle combat (works universally; refine per-game)
-        local target = GetClosestTarget()
-        if target then
-            -- Patch any Vector3 argument that looks like an aim position
-            for i, arg in ipairs(args) do
-                if typeof(arg) == "Vector3" then
-                    args[i] = target.Position
-                end
-                -- Some games pass CFrame
-                if typeof(arg) == "CFrame" then
-                    args[i] = CFrame.new(target.Position)
+        if State.SilentAimEnabled and (method == "FireServer" or method == "InvokeServer") then
+            local target = GetClosestTarget()
+            if target then
+                for i, v in ipairs(args) do
+                    if typeof(v) == "Vector3" then
+                        args[i] = target.Position
+                    elseif typeof(v) == "CFrame" then
+                        args[i] = CFrame.new(target.Position)
+                    end
                 end
             end
         end
-    end
 
-    return oldIndex(self, table.unpack(args))
+        return oldNC(self, table.unpack(args))
+    end)
+
+    setreadonly_(mt, true)
 end)
 
-setreadonly(mt, true)
+if not hookOk then
+    warn("[Ghost] Silent aim hook failed — executor may not support __namecall patching")
+end
 
 -- ============================================================
--- ESP ENGINE
+-- ESP ENGINE — Fixed: SelectionBox on HRP, Drawing Line no Transparency
 -- ============================================================
 
-local ESPFolder = Instance.new("Folder", game.CoreGui)
-ESPFolder.Name  = "_GhostESP"
+-- Safely parent to CoreGui or fallback to PlayerGui
+local ESPFolder
+pcall(function() ESPFolder = Instance.new("Folder", game.CoreGui) end)
+if not ESPFolder then
+    ESPFolder = Instance.new("Folder", LocalPlayer.PlayerGui)
+end
+ESPFolder.Name = "_GhostESP"
 
-local ESPObjects = {} -- [char] = { box, name, dist, line }
+local ESPObjects = {}
 
 local function MakeESPForChar(char, label)
     if ESPObjects[char] then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
 
     local obj = {}
 
-    -- Billboard Name + Distance
-    local bb = Instance.new("BillboardGui")
-    bb.Name            = "_ESP_BB"
+    -- Billboard (Name + Distance) — adorn HRP not char model
+    local bb           = Instance.new("BillboardGui")
     bb.AlwaysOnTop     = true
-    bb.Size            = UDim2.new(0, 200, 0, 50)
-    bb.StudsOffset     = Vector3.new(0, 3, 0)
-    bb.Adornee         = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChildWhichIsA("BasePart")
+    bb.Size            = UDim2.new(0, 200, 0, 48)
+    bb.StudsOffset     = Vector3.new(0, 3.2, 0)
+    bb.Adornee         = hrp   -- ← FIX: HRP not char
     bb.Parent          = ESPFolder
 
-    local nameLabel = Instance.new("TextLabel", bb)
-    nameLabel.Size            = UDim2.new(1, 0, 0.5, 0)
+    local nameLabel    = Instance.new("TextLabel", bb)
+    nameLabel.Size     = UDim2.new(1, 0, 0.5, 0)
     nameLabel.BackgroundTransparency = 1
-    nameLabel.TextColor3      = State.ESPTextColor
+    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     nameLabel.TextStrokeTransparency = 0
-    nameLabel.Font            = Enum.Font.GothamBold
-    nameLabel.TextScaled      = true
-    nameLabel.Text            = label
+    nameLabel.Font     = Enum.Font.GothamBold
+    nameLabel.TextScaled = true
+    nameLabel.Text     = label
 
-    local distLabel = Instance.new("TextLabel", bb)
-    distLabel.Size            = UDim2.new(1, 0, 0.5, 0)
-    distLabel.Position        = UDim2.new(0, 0, 0.5, 0)
+    local distLabel    = Instance.new("TextLabel", bb)
+    distLabel.Size     = UDim2.new(1, 0, 0.5, 0)
+    distLabel.Position = UDim2.new(0, 0, 0.5, 0)
     distLabel.BackgroundTransparency = 1
-    distLabel.TextColor3      = Color3.fromRGB(200, 200, 200)
+    distLabel.TextColor3 = Color3.fromRGB(180, 180, 255)
     distLabel.TextStrokeTransparency = 0
-    distLabel.Font            = Enum.Font.Gotham
-    distLabel.TextScaled      = true
-    distLabel.Text            = "0m"
+    distLabel.Font     = Enum.Font.Gotham
+    distLabel.TextScaled = true
+    distLabel.Text     = "0m"
 
-    -- Box (SelectionBox)
-    local box = Instance.new("SelectionBox")
-    box.Color3            = State.ESPBoxColor
-    box.LineThickness     = 0.03
+    -- SelectionBox — adorn HRP for reliable bounding box
+    local box          = Instance.new("SelectionBox")
+    box.Color3         = Color3.fromRGB(138, 43, 226)
+    box.LineThickness  = 0.04
     box.SurfaceTransparency = 1
-    box.SurfaceColor3     = State.ESPBoxColor
-    box.Adornee           = char
-    box.Parent            = ESPFolder
+    box.Adornee        = hrp   -- ← FIX: HRP not char
+    box.Parent         = ESPFolder
 
-    -- Tracer line
-    local line = Drawing.new("Line")
-    line.Visible   = false
-    line.Thickness = 1
-    line.Color     = State.ESPLineColor
-    line.Transparency = 1
+    -- Tracer line — FIX: no .Transparency on Drawing Line, use .Color directly
+    local line         = Drawing.new("Line")
+    line.Thickness     = 1.5
+    line.Color         = Color3.fromRGB(255, 0, 80)   -- ← FIX: removed bogus .Transparency
+    line.Visible       = false
 
-    obj.bb        = bb
-    obj.nameLabel = nameLabel
-    obj.distLabel = distLabel
-    obj.box       = box
-    obj.line      = line
-    obj.char      = char
+    obj.bb         = bb
+    obj.nameLabel  = nameLabel
+    obj.distLabel  = distLabel
+    obj.box        = box
+    obj.line       = line
 
     ESPObjects[char] = obj
 end
@@ -230,51 +226,44 @@ end
 local function RemoveESPForChar(char)
     local obj = ESPObjects[char]
     if not obj then return end
-    obj.bb:Destroy()
-    obj.box:Destroy()
-    obj.line:Remove()
+    pcall(function() obj.bb:Destroy() end)
+    pcall(function() obj.box:Destroy() end)
+    pcall(function() obj.line:Remove() end)
     ESPObjects[char] = nil
 end
 
--- *ESP update loop — every frame the screen is repainted with truth the game didn't intend to show*
 RunService.RenderStepped:Connect(function()
-    -- Cleanup dead objects
+    -- Always clean dead/killed chars regardless of toggle state
     for char in pairs(ESPObjects) do
         local hum = char:FindFirstChildOfClass("Humanoid")
-        if not char.Parent or not hum or hum.Health <= 0 then
+        if not char.Parent or (hum and hum.Health <= 0) then
             RemoveESPForChar(char)
         end
     end
 
     if not State.ESPEnabled then
-        for char in pairs(ESPObjects) do RemoveESPForChar(char) end
+        -- FIX: Properly wipe all ESP when toggled off
+        for char in pairs(ESPObjects) do
+            RemoveESPForChar(char)
+        end
         return
     end
 
-    local localChar = LocalPlayer.Character
-    local localHRP  = localChar and localChar:FindFirstChild("HumanoidRootPart")
-
-    -- Players
+    -- Register new targets
     if State.TargetPlayers then
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character then
-                local char = p.Character
-                if not ESPObjects[char] then MakeESPForChar(char, p.Name) end
+                MakeESPForChar(p.Character, p.Name)
             end
         end
     end
 
-    -- NPCs
     if State.TargetNPC then
-        local playerChars = {}
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p.Character then playerChars[p.Character] = true end
-        end
-
+        local pChars = GetPlayerChars()
         for _, obj in ipairs(workspace:GetDescendants()) do
             if obj:IsA("Humanoid") then
                 local char = obj.Parent
-                if char and not playerChars[char] and not ESPObjects[char] then
+                if char and not pChars[char] then
                     MakeESPForChar(char, char.Name)
                 end
             end
@@ -282,30 +271,30 @@ RunService.RenderStepped:Connect(function()
     end
 
     -- Update per-object
-    local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    local localChar = LocalPlayer.Character
+    local localHRP  = localChar and localChar:FindFirstChild("HumanoidRootPart")
+    local center    = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
     for char, obj in pairs(ESPObjects) do
         local hrp = char:FindFirstChild("HumanoidRootPart")
         if not hrp then continue end
 
-        -- Visibility toggles
-        obj.bb.Enabled    = State.ShowNames or State.ShowDist
+        obj.bb.Enabled       = State.ShowNames or State.ShowDist
         obj.nameLabel.Visible = State.ShowNames
         obj.distLabel.Visible = State.ShowDist
-        obj.box.Visible   = State.ShowBoxes
+        obj.box.Visible       = State.ShowBoxes
 
-        -- Distance
         if localHRP then
             local d = math.floor((hrp.Position - localHRP.Position).Magnitude)
-            obj.distLabel.Text = d .. "m"
+            obj.distLabel.Text = tostring(d) .. "m"
         end
 
-        -- Tracer line
         if State.ShowLines then
-            local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+            local sp, onScreen = Camera:WorldToViewportPoint(hrp.Position)
             if onScreen then
                 obj.line.Visible = true
                 obj.line.From    = center
-                obj.line.To      = Vector2.new(screenPos.X, screenPos.Y)
+                obj.line.To      = Vector2.new(sp.X, sp.Y)
             else
                 obj.line.Visible = false
             end
@@ -316,17 +305,16 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ============================================================
--- FOV CIRCLE (visual indicator)
+-- FOV CIRCLE
 -- ============================================================
 
-local fovCircle       = Drawing.new("Circle")
-fovCircle.Visible     = true
-fovCircle.Thickness   = 1
-fovCircle.Color       = Color3.fromRGB(138, 43, 226)
-fovCircle.Filled      = false
-fovCircle.NumSides    = 64
-fovCircle.Radius      = State.FOVRadius
-fovCircle.Transparency = 1
+local fovCircle      = Drawing.new("Circle")
+fovCircle.Thickness  = 1.5
+fovCircle.Color      = Color3.fromRGB(138, 43, 226)
+fovCircle.Filled     = false
+fovCircle.NumSides   = 64
+fovCircle.Radius     = State.FOVRadius
+fovCircle.Visible    = false
 
 RunService.RenderStepped:Connect(function()
     fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
@@ -335,29 +323,31 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ============================================================
--- UI — Quantum Onyx Style (Purple / Dark, tabbed, toggleable)
+-- UI — Fixed drag system (Frame.Draggable is broken in newer Roblox)
 -- ============================================================
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name            = "GhostFrameworkUI"
 ScreenGui.ResetOnSpawn    = false
 ScreenGui.ZIndexBehavior  = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent          = game.CoreGui  -- bypass localscript restrictions
+pcall(function()
+    ScreenGui.Parent = game.CoreGui
+end)
+if not ScreenGui.Parent then
+    ScreenGui.Parent = LocalPlayer.PlayerGui
+end
 
--- Main Frame
+-- Main frame
 local Main = Instance.new("Frame", ScreenGui)
-Main.Name            = "Main"
-Main.Size            = UDim2.new(0, 520, 0, 380)
-Main.Position        = UDim2.new(0.5, -260, 0.5, -190)
+Main.Name             = "Main"
+Main.Size             = UDim2.new(0, 520, 0, 380)
+Main.Position         = UDim2.new(0.5, -260, 0.5, -190)
 Main.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 Main.BorderSizePixel  = 0
-Main.Active           = true
-Main.Draggable        = true
 Main.ClipsDescendants = true
-
+-- NOTE: Main.Draggable REMOVED — broken on modern Roblox
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- Gradient overlay
 local grad = Instance.new("UIGradient", Main)
 grad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 15, 40)),
@@ -365,59 +355,98 @@ grad.Color = ColorSequence.new({
 })
 grad.Rotation = 135
 
--- Top bar
+-- ============================================================
+-- FIXED DRAG SYSTEM — manual InputBegan/InputChanged/InputEnded
+-- ============================================================
+do
+    local dragging   = false
+    local dragStart  = Vector2.new()
+    local frameStart = Vector2.new()
+
+    local TopDrag = Instance.new("Frame", Main)  -- invisible drag handle = top bar area
+    TopDrag.Size             = UDim2.new(1, -50, 0, 40)
+    TopDrag.BackgroundTransparency = 1
+    TopDrag.ZIndex           = 10
+
+    TopDrag.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            dragging   = true
+            dragStart  = Vector2.new(input.Position.X, input.Position.Y)
+            frameStart = Vector2.new(Main.Position.X.Offset, Main.Position.Y.Offset)
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if not dragging then return end
+        if input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch then
+            local delta = Vector2.new(input.Position.X, input.Position.Y) - dragStart
+            Main.Position = UDim2.new(0, frameStart.X + delta.X, 0, frameStart.Y + delta.Y)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+end
+
+-- Top bar visual
 local TopBar = Instance.new("Frame", Main)
 TopBar.Size             = UDim2.new(1, 0, 0, 40)
 TopBar.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
 TopBar.BorderSizePixel  = 0
+TopBar.ZIndex           = 5
 Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
 
 local TitleLabel = Instance.new("TextLabel", TopBar)
 TitleLabel.Size               = UDim2.new(1, -50, 1, 0)
 TitleLabel.Position           = UDim2.new(0, 12, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text               = "👻 Ghost Framework v1.0"
+TitleLabel.Text               = "👻 Ghost Framework v2.0"
 TitleLabel.TextColor3         = Color3.fromRGB(255, 255, 255)
 TitleLabel.Font               = Enum.Font.GothamBold
 TitleLabel.TextSize           = 15
 TitleLabel.TextXAlignment     = Enum.TextXAlignment.Left
+TitleLabel.ZIndex             = 6
 
--- Close / Toggle button (X)
+-- Close button
 local CloseBtn = Instance.new("TextButton", TopBar)
-CloseBtn.Size               = UDim2.new(0, 36, 0, 36)
-CloseBtn.Position           = UDim2.new(1, -40, 0, 2)
-CloseBtn.BackgroundColor3   = Color3.fromRGB(200, 50, 80)
-CloseBtn.Text               = "×"
-CloseBtn.TextColor3         = Color3.fromRGB(255,255,255)
-CloseBtn.Font               = Enum.Font.GothamBold
-CloseBtn.TextSize           = 22
-CloseBtn.BorderSizePixel    = 0
+CloseBtn.Size             = UDim2.new(0, 36, 0, 32)
+CloseBtn.Position         = UDim2.new(1, -42, 0, 4)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 70)
+CloseBtn.Text             = "×"
+CloseBtn.TextColor3       = Color3.fromRGB(255, 255, 255)
+CloseBtn.Font             = Enum.Font.GothamBold
+CloseBtn.TextSize         = 22
+CloseBtn.BorderSizePixel  = 0
+CloseBtn.ZIndex           = 7
 Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
 
--- Minimize to small toggle button when closed
+-- Toggle pill (shown when closed)
 local ToggleBtn = Instance.new("TextButton", ScreenGui)
-ToggleBtn.Name              = "ToggleBtn"
-ToggleBtn.Size              = UDim2.new(0, 120, 0, 34)
-ToggleBtn.Position          = UDim2.new(0, 12, 0.5, -17)
-ToggleBtn.BackgroundColor3  = Color3.fromRGB(138, 43, 226)
-ToggleBtn.Text              = "👻 Ghost FW"
-ToggleBtn.TextColor3        = Color3.fromRGB(255,255,255)
-ToggleBtn.Font              = Enum.Font.GothamBold
-ToggleBtn.TextSize          = 13
-ToggleBtn.BorderSizePixel   = 0
-ToggleBtn.Visible           = false
+ToggleBtn.Size            = UDim2.new(0, 130, 0, 34)
+ToggleBtn.Position        = UDim2.new(0, 12, 0.5, -17)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
+ToggleBtn.Text            = "👻 Ghost FW"
+ToggleBtn.TextColor3      = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Font            = Enum.Font.GothamBold
+ToggleBtn.TextSize        = 13
+ToggleBtn.BorderSizePixel = 0
+ToggleBtn.Visible         = false
 Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0, 8)
 
 CloseBtn.MouseButton1Click:Connect(function()
-    Main.Visible    = false
+    Main.Visible      = false
     ToggleBtn.Visible = true
-    State.UIOpen    = false
 end)
 
 ToggleBtn.MouseButton1Click:Connect(function()
-    Main.Visible    = true
+    Main.Visible      = true
     ToggleBtn.Visible = false
-    State.UIOpen    = true
 end)
 
 -- Tab bar
@@ -428,125 +457,133 @@ TabBar.BackgroundColor3 = Color3.fromRGB(20, 12, 35)
 TabBar.BorderSizePixel  = 0
 
 local TabLayout = Instance.new("UIListLayout", TabBar)
-TabLayout.FillDirection = Enum.FillDirection.Horizontal
-TabLayout.Padding       = UDim.new(0, 2)
+TabLayout.FillDirection     = Enum.FillDirection.Horizontal
+TabLayout.Padding           = UDim.new(0, 2)
 TabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
 -- Content area
 local Content = Instance.new("Frame", Main)
-Content.Position        = UDim2.new(0, 0, 0, 76)
-Content.Size            = UDim2.new(1, 0, 1, -76)
+Content.Position             = UDim2.new(0, 0, 0, 76)
+Content.Size                 = UDim2.new(1, 0, 1, -76)
 Content.BackgroundTransparency = 1
-Content.ClipsDescendants = true
+Content.ClipsDescendants     = true
 
 -- ============================================================
--- UI HELPERS
+-- UI COMPONENT BUILDERS
 -- ============================================================
 
 local function MakeTab(name)
     local btn = Instance.new("TextButton", TabBar)
-    btn.Size              = UDim2.new(0, 120, 1, 0)
-    btn.BackgroundColor3  = Color3.fromRGB(30, 18, 50)
-    btn.BorderSizePixel   = 0
-    btn.Text              = name
-    btn.TextColor3        = Color3.fromRGB(180, 180, 200)
-    btn.Font              = Enum.Font.GothamSemibold
-    btn.TextSize          = 13
+    btn.Size             = UDim2.new(0, 118, 1, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 18, 50)
+    btn.BorderSizePixel  = 0
+    btn.Text             = name
+    btn.TextColor3       = Color3.fromRGB(180, 180, 200)
+    btn.Font             = Enum.Font.GothamSemibold
+    btn.TextSize         = 13
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 
     local page = Instance.new("ScrollingFrame", Content)
-    page.Size                  = UDim2.new(1, 0, 1, 0)
+    page.Size                   = UDim2.new(1, 0, 1, 0)
     page.BackgroundTransparency = 1
-    page.BorderSizePixel       = 0
-    page.CanvasSize            = UDim2.new(0, 0, 0, 0)
-    page.AutomaticCanvasSize   = Enum.AutomaticSize.Y
-    page.ScrollBarThickness    = 4
-    page.ScrollBarImageColor3  = Color3.fromRGB(138, 43, 226)
-    page.Visible               = false
+    page.BorderSizePixel        = 0
+    page.CanvasSize             = UDim2.new(0, 0, 0, 0)
+    page.AutomaticCanvasSize    = Enum.AutomaticSize.Y
+    page.ScrollBarThickness     = 4
+    page.ScrollBarImageColor3   = Color3.fromRGB(138, 43, 226)
+    page.Visible                = false
 
     local layout = Instance.new("UIListLayout", page)
-    layout.Padding     = UDim.new(0, 6)
-    layout.SortOrder   = Enum.SortOrder.LayoutOrder
+    layout.Padding   = UDim.new(0, 6)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
 
-    local padding = Instance.new("UIPadding", page)
-    padding.PaddingLeft   = UDim.new(0, 10)
-    padding.PaddingRight  = UDim.new(0, 10)
-    padding.PaddingTop    = UDim.new(0, 8)
+    local pad = Instance.new("UIPadding", page)
+    pad.PaddingLeft  = UDim.new(0, 10)
+    pad.PaddingRight = UDim.new(0, 10)
+    pad.PaddingTop   = UDim.new(0, 8)
 
     return btn, page
 end
 
+-- Fixed toggle — updates visual on both create and click, no stale closure
 local function MakeToggle(parent, label, stateKey, order)
     local row = Instance.new("Frame", parent)
-    row.Size              = UDim2.new(1, 0, 0, 38)
-    row.BackgroundColor3  = Color3.fromRGB(25, 15, 42)
-    row.BorderSizePixel   = 0
-    row.LayoutOrder       = order or 0
+    row.Size             = UDim2.new(1, 0, 0, 40)
+    row.BackgroundColor3 = Color3.fromRGB(25, 15, 42)
+    row.BorderSizePixel  = 0
+    row.LayoutOrder      = order or 0
     Instance.new("UICorner", row).CornerRadius = UDim.new(0, 8)
 
     local lbl = Instance.new("TextLabel", row)
-    lbl.Size              = UDim2.new(0.7, 0, 1, 0)
-    lbl.Position          = UDim2.new(0, 10, 0, 0)
+    lbl.Size             = UDim2.new(0.72, 0, 1, 0)
+    lbl.Position         = UDim2.new(0, 10, 0, 0)
     lbl.BackgroundTransparency = 1
-    lbl.Text              = label
-    lbl.TextColor3        = Color3.fromRGB(210, 210, 230)
-    lbl.Font              = Enum.Font.Gotham
-    lbl.TextSize          = 13
-    lbl.TextXAlignment    = Enum.TextXAlignment.Left
+    lbl.Text             = label
+    lbl.TextColor3       = Color3.fromRGB(210, 210, 230)
+    lbl.Font             = Enum.Font.Gotham
+    lbl.TextSize         = 13
+    lbl.TextXAlignment   = Enum.TextXAlignment.Left
 
-    local toggle = Instance.new("TextButton", row)
-    toggle.Size           = UDim2.new(0, 46, 0, 24)
-    toggle.Position       = UDim2.new(1, -56, 0.5, -12)
-    toggle.BorderSizePixel = 0
-    toggle.Text           = ""
-    Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
+    local toggleFrame = Instance.new("Frame", row)
+    toggleFrame.Size            = UDim2.new(0, 46, 0, 24)
+    toggleFrame.Position        = UDim2.new(1, -56, 0.5, -12)
+    toggleFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+    toggleFrame.BorderSizePixel = 0
+    Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(1, 0)
 
-    local knob = Instance.new("Frame", toggle)
+    local knob = Instance.new("Frame", toggleFrame)
     knob.Size             = UDim2.new(0, 20, 0, 20)
     knob.Position         = UDim2.new(0, 2, 0.5, -10)
     knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     knob.BorderSizePixel  = 0
     Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
 
-    local function UpdateVisual()
+    local function Refresh()
         local on = State[stateKey]
-        toggle.BackgroundColor3 = on
-            and Color3.fromRGB(138, 43, 226)
-            or  Color3.fromRGB(60, 60, 80)
-        knob.Position = on
-            and UDim2.new(1, -22, 0.5, -10)
-            or  UDim2.new(0, 2, 0.5, -10)
+        -- FIX: tween the toggle so it feels snappy
+        TweenService:Create(toggleFrame, TweenInfo.new(0.12), {
+            BackgroundColor3 = on and Color3.fromRGB(138, 43, 226) or Color3.fromRGB(60, 60, 80)
+        }):Play()
+        TweenService:Create(knob, TweenInfo.new(0.12), {
+            Position = on and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+        }):Play()
     end
 
-    UpdateVisual()
+    Refresh()  -- set initial visual state
 
-    toggle.MouseButton1Click:Connect(function()
+    -- FIX: clickable area covers the whole row, not just the tiny knob
+    local hitbox = Instance.new("TextButton", row)
+    hitbox.Size             = UDim2.new(1, 0, 1, 0)
+    hitbox.BackgroundTransparency = 1
+    hitbox.Text             = ""
+    hitbox.ZIndex           = 5
+
+    hitbox.MouseButton1Click:Connect(function()
         State[stateKey] = not State[stateKey]
-        UpdateVisual()
+        Refresh()
     end)
 end
 
 local function MakeSlider(parent, label, stateKey, min, max, order)
     local row = Instance.new("Frame", parent)
-    row.Size              = UDim2.new(1, 0, 0, 54)
-    row.BackgroundColor3  = Color3.fromRGB(25, 15, 42)
-    row.BorderSizePixel   = 0
-    row.LayoutOrder       = order or 0
+    row.Size             = UDim2.new(1, 0, 0, 58)
+    row.BackgroundColor3 = Color3.fromRGB(25, 15, 42)
+    row.BorderSizePixel  = 0
+    row.LayoutOrder      = order or 0
     Instance.new("UICorner", row).CornerRadius = UDim.new(0, 8)
 
     local lbl = Instance.new("TextLabel", row)
-    lbl.Size              = UDim2.new(0.75, 0, 0, 22)
-    lbl.Position          = UDim2.new(0, 10, 0, 4)
+    lbl.Size             = UDim2.new(1, -10, 0, 24)
+    lbl.Position         = UDim2.new(0, 10, 0, 4)
     lbl.BackgroundTransparency = 1
-    lbl.Text              = label .. ": " .. tostring(State[stateKey])
-    lbl.TextColor3        = Color3.fromRGB(210, 210, 230)
-    lbl.Font              = Enum.Font.Gotham
-    lbl.TextSize          = 13
-    lbl.TextXAlignment    = Enum.TextXAlignment.Left
+    lbl.TextColor3       = Color3.fromRGB(210, 210, 230)
+    lbl.Font             = Enum.Font.Gotham
+    lbl.TextSize         = 13
+    lbl.TextXAlignment   = Enum.TextXAlignment.Left
 
     local track = Instance.new("Frame", row)
     track.Size            = UDim2.new(1, -20, 0, 6)
-    track.Position        = UDim2.new(0, 10, 0, 34)
+    track.Position        = UDim2.new(0, 10, 0, 38)
     track.BackgroundColor3 = Color3.fromRGB(50, 30, 80)
     track.BorderSizePixel = 0
     Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
@@ -558,24 +595,31 @@ local function MakeSlider(parent, label, stateKey, min, max, order)
 
     local function UpdateFill()
         local pct = (State[stateKey] - min) / (max - min)
-        fill.Size = UDim2.new(pct, 0, 1, 0)
-        lbl.Text  = label .. ": " .. tostring(math.floor(State[stateKey]))
+        fill.Size = UDim2.new(math.clamp(pct, 0, 1), 0, 1, 0)
+        lbl.Text  = label .. ":  " .. tostring(math.floor(State[stateKey]))
     end
 
     UpdateFill()
 
-    local dragging = false
-    track.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
-    end)
+    -- FIX: slider uses a transparent TextButton as drag surface (more reliable than InputBegan on Frame)
+    local sliderBtn = Instance.new("TextButton", track)
+    sliderBtn.Size             = UDim2.new(1, 0, 0, 20)
+    sliderBtn.Position         = UDim2.new(0, 0, 0.5, -10)
+    sliderBtn.BackgroundTransparency = 1
+    sliderBtn.Text             = ""
+    sliderBtn.ZIndex           = 5
+
+    local sliding = false
+
+    sliderBtn.MouseButton1Down:Connect(function()  sliding = true  end)
     UserInputService.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then sliding = false end
     end)
     UserInputService.InputChanged:Connect(function(i)
-        if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-            local absPos  = track.AbsolutePosition.X
-            local absSize = track.AbsoluteSize.X
-            local pct     = math.clamp((i.Position.X - absPos) / absSize, 0, 1)
+        if sliding and i.UserInputType == Enum.UserInputType.MouseMovement then
+            local abs  = track.AbsolutePosition.X
+            local size = track.AbsoluteSize.X
+            local pct  = math.clamp((i.Position.X - abs) / size, 0, 1)
             State[stateKey] = min + (max - min) * pct
             UpdateFill()
         end
@@ -588,9 +632,8 @@ end
 
 local tabs   = {}
 local pages  = {}
-local active = nil
 
-local tabDefs = {"Aimbot", "Silent Aim", "ESP", "Settings"}
+local tabDefs = { "Aimbot", "Silent Aim", "ESP", "Settings" }
 
 for i, name in ipairs(tabDefs) do
     local btn, page = MakeTab(name)
@@ -598,28 +641,33 @@ for i, name in ipairs(tabDefs) do
     pages[i] = page
 
     btn.MouseButton1Click:Connect(function()
-        for j, p in ipairs(pages) do
-            p.Visible = (j == i)
+        for j = 1, #pages do
+            pages[j].Visible         = (j == i)
             tabs[j].BackgroundColor3 = (j == i)
                 and Color3.fromRGB(138, 43, 226)
                 or  Color3.fromRGB(30, 18, 50)
-            tabs[j].TextColor3 = (j == i)
-                and Color3.fromRGB(255,255,255)
-                or  Color3.fromRGB(180,180,200)
+            tabs[j].TextColor3       = (j == i)
+                and Color3.fromRGB(255, 255, 255)
+                or  Color3.fromRGB(180, 180, 200)
         end
     end)
 end
 
-pages[1].Visible = true -- default open on Aimbot
+-- Default to tab 1
+pages[1].Visible         = true
 tabs[1].BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-tabs[1].TextColor3 = Color3.fromRGB(255,255,255)
+tabs[1].TextColor3       = Color3.fromRGB(255, 255, 255)
+
+-- ============================================================
+-- POPULATE TABS
+-- ============================================================
 
 -- Tab 1: Aimbot
-MakeToggle(pages[1], "Enable Aimbot",    "AimbotEnabled",  1)
-MakeToggle(pages[1], "Target Players",   "TargetPlayers",  2)
-MakeToggle(pages[1], "Target NPCs",      "TargetNPC",      3)
-MakeSlider(pages[1], "FOV Radius",       "FOVRadius",      50, 500, 4)
-MakeSlider(pages[1], "Smoothing (×0.01)","AimbotSmoothing",1, 100, 5)
+MakeToggle(pages[1], "Enable Aimbot",   "AimbotEnabled",  1)
+MakeToggle(pages[1], "Target Players",  "TargetPlayers",  2)
+MakeToggle(pages[1], "Target NPCs",     "TargetNPC",      3)
+MakeSlider(pages[1], "FOV Radius",      "FOVRadius",      50, 500, 4)
+MakeSlider(pages[1], "Smoothing",       "AimbotSmoothing",1,  99,  5)
 
 -- Tab 2: Silent Aim
 MakeToggle(pages[2], "Enable Silent Aim","SilentAimEnabled",1)
@@ -628,14 +676,16 @@ MakeToggle(pages[2], "Target NPCs",      "TargetNPC",       3)
 MakeSlider(pages[2], "FOV Radius",       "FOVRadius",       50, 500, 4)
 
 -- Tab 3: ESP
-MakeToggle(pages[3], "Enable ESP",   "ESPEnabled",  1)
-MakeToggle(pages[3], "Show Names",   "ShowNames",   2)
-MakeToggle(pages[3], "Show Distance","ShowDist",    3)
-MakeToggle(pages[3], "Show Boxes",   "ShowBoxes",   4)
-MakeToggle(pages[3], "Show Lines",   "ShowLines",   5)
-MakeToggle(pages[3], "ESP Players",  "TargetPlayers",6)
-MakeToggle(pages[3], "ESP NPCs",     "TargetNPC",   7)
+MakeToggle(pages[3], "Enable ESP",    "ESPEnabled",   1)
+MakeToggle(pages[3], "Show Names",    "ShowNames",    2)
+MakeToggle(pages[3], "Show Distance", "ShowDist",     3)
+MakeToggle(pages[3], "Show Boxes",    "ShowBoxes",    4)
+MakeToggle(pages[3], "Show Lines",    "ShowLines",    5)
+MakeToggle(pages[3], "ESP Players",   "TargetPlayers",6)
+MakeToggle(pages[3], "ESP NPCs",      "TargetNPC",    7)
 
 -- Tab 4: Settings
-MakeSlider(pages[4], "FOV Radius",   "FOVRadius",   50, 600, 1)
-MakeSlider(pages[4], "Smoothing",    "AimbotSmoothing", 1, 100, 2)
+MakeSlider(pages[4], "FOV Radius",  "FOVRadius",       50, 600, 1)
+MakeSlider(pages[4], "Smoothing",   "AimbotSmoothing", 1,  99,  2)
+
+print("[Ghost Framework v2.0] Loaded ✔")
