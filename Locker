@@ -1,0 +1,940 @@
+-- Senior Hub • Sources
+-- https://discord.gg/CaDQtHqZxA
+-- Engine Used: MoonSec V3
+-- Timestamp: 2026-11-02T10:59:59.853Z
+-- Extracted String Constants (22 sample): attempt to call missing method | VHTZ | number | YbvJ | table | then return hsY or | tRAY | XJJf | SOyp | FbiJ | pRnu | TPCR
+-- This file is protected by Manul V1.0.0 BETA-1 >>  <<
+return ({["gKs"]=((function(jOI,rbg,bqt)local hgd,BIP,fsJ,QOi=rbg[0x36FF],(((bqt[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,rbg[0x6B62],bqt[6];
+local wN3=QOi[1];
+do
+    local rhH,Bbn=BIP,#hgd[BIP];
+    hgd[rhH]=Bbn;
+    local akG=fsJ and fsJ[rhH];
+    if akG then
+        akG[1]=Bbn;
+    end
+    ;
+end
+;
+end
+)),["p"]=((function(EOR,cbx,pk9)local cNe,CzP,Nsw,wbE=(((pk9[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,pk9[6],cbx[0x6B62],cbx[0x36FF];
+local QNL,JNU=CzP[3],CzP[1];
+do
+    local xhJ,rgl=cNe,wbE[(JNU[0x11F5] or 0)] / (QNL[0x11F5] or 0);
+    wbE[xhJ]=rgl;
+    local ljR=Nsw and Nsw[xhJ];
+    if ljR then
+        ljR[1]=rgl;
+    end
+    ;
+end
+;
+end
+)),["dhS"]=((function(waU,GnM,jlb)local NT7,Fmh=waU.Xd,waU.RfO;
+local Mxa,az7=NT7(waU,GnM,(((jlb[6] or {})[1] or {}))),GnM[0x70C6];
+local pys=az7[Mxa];
+if pys == waU.pC then
+    Fmh(waU,GnM,(((jlb[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,nil);
+elseif
+pys ~= nil then
+    Fmh(waU,GnM,(((jlb[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,pys);
+elseif
+Mxa == waU.hY then
+    Fmh(waU,GnM,(((jlb[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,true);
+elseif
+az7 ~= waU.G then
+    Fmh(waU,GnM,(((jlb[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,nil);
+else
+    Fmh(waU,GnM,(((jlb[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,waU.ivXo[Mxa]);
+end
+;
+end
+)),["vL"]=((function(NdU,yrN,Uux)local g_w,ipD=NdU.Xd,NdU.RfO;
+local npL=yrN[0x36FF][(((Uux[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD];
+ipD(NdU,yrN,(((Uux[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD + 1,npL);
+local AzH=g_w(NdU,yrN,(((Uux[6] or {})[1] or {})));
+local kyl=npL[AzH];
+if kyl == nil then
+    ipD(NdU,yrN,(((Uux[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,((function()error("attempt to call missing method '" .. tostring(AzH) .. "' of " .. type(npL));
+end
+)));
+else
+    ipD(NdU,yrN,(((Uux[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,kyl);
+end
+;
+end
+)),["Neo"]=((function(GuS,PkD,zyf)local Vbi=GuS.ivXo;
+local VkL,wxO,BkU,cpP=Vbi.string.char,Vbi.math.floor,Vbi.table.concat,Vbi.string.byte;
+local function S_T(sOf,hOw)local gOT,GkC=0,1;
+while sOf > 0 or hOw > 0 do
+    local cAO,mAI=hOw % 2,sOf % 2;
+    if mAI ~= cAO then
+        gOT=gOT + GkC;
+    end
+    ;
+    sOf=(sOf - mAI) / 2;
+    hOw=(hOw - cAO) / 2;
+    GkC=GkC * 2;
+end
+;
+return gOT;
+end
+;
+local QkF=(GuS.eOAe and GuS.eOAe.bxor) or S_T;
+local function wfx(kIb)local ppQ=173;
+for qIg=1,#kIb do
+    ppQ=(ppQ * 131 + cpP(kIb,qIg) + qIg) % 0x10000;
+end
+;
+return ppQ;
+end
+;
+local pAR,bpX=#PkD,#zyf;
+if bpX == 0 then
+    return "";
+end
+;
+local IzD,Oae={},GuS.i;
+if Oae == nil then
+    Oae={};
+    GuS.i=Oae;
+end
+;
+local lno=Oae[zyf];
+if lno == nil then
+    lno=wfx(zyf);
+    Oae[zyf]=lno;
+end
+;
+local xp3=bpX * 13 % 256;
+for xul=1,pAR do
+    local CgF=((xul - 1) % bpX) + 1;
+    local vAD=cpP(zyf,CgF);
+    local zOS,gAU=(lno + wxO(lno / 256) + vAD + xp3) % 256,cpP(PkD,xul);
+    IzD[xul]=VkL(QkF(gAU,zOS));
+    xp3=gAU;
+    lno=(lno + vAD * 17 + xul * 11 + xp3 * 7) % 0x10000;
+end
+;
+return BkU(IzD);
+end
+)),["VHTZ"]=((function(DdW,jfN,nuP)local Q_P,J_V=DdW.XfF,DdW.RfO;
+local suV,Ol_,Hyj,Tsu=(((((nuP[6] or {})[3] or {})))[0x11F5] or 0),(((((nuP[6] or {})[1] or {})))[0x11F5] or 0),{},nuP[4];
+if type(Tsu) ~= "number" then
+    Tsu=(DdW.ww)(DdW,Tsu or "",1) or 0;
+    nuP[4]=Tsu;
+end
+;
+if Tsu ~= 0 then
+    suV=jfN[0x710F] or (Ol_ - 1);
+end
+;
+local pnl=0;
+for e_K=Ol_,suV do
+    pnl=pnl + 1;
+    Hyj[pnl]=Q_P(DdW,jfN,e_K);
+end
+;
+J_V(DdW,jfN,(((nuP[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,Hyj);
+end
+)),["RAz"]=((function(gnm,cuX,knf,ul7)if not gnm.H then
+    return;
+end
+;
+cuX=(gnm.IR)(gnm,cuX);
+local Isf,cl8,ml9,_rW=(gnm.GX)(gnm,cuX,ul7);
+local riu=(gnm.DBeJ)(gnm,Isf,cl8,ml9);
+if knf and knf ~= 0 then
+    (gnm.YbvJ)(gnm,riu[0x2AE2],riu[0x27DF],knf);
+end
+;
+return {riu,_rW or {}};
+end
+)),["YbvJ"]=((function(Tql,Csq,VyH,yes)if type(Csq) ~= "table" then
+    return yes or 0;
+end
+;
+yes=yes or 0;
+local GsO=yes < 0;
+if not GsO and yes == 0 then
+    return yes;
+end
+;
+local cmI,Fcp,Bvw=yes,0,1;
+while GsO or Fcp < cmI do
+    local my2=Csq[Bvw];
+    if my2 == nil then
+        break;
+    end
+    ;
+    Fcp=Fcp + 1;
+    yes=(Tql.tRAY)(Tql,my2,VyH,yes);
+    if not GsO and yes == 0 then
+        break;
+    end
+    ;
+    Bvw=Bvw + 1;
+end
+;
+return yes;
+end
+)),["Bo"]=((function(dvI,hsY,JJ)if hsY == nil or hsY == "" then
+    return hsY or "";
+end
+;
+local Ujl=dvI.ivXo;
+local Cju,Fjm,rTD=Ujl.table.concat,Ujl.string.byte,Ujl.string.char;
+local wmH,igs,BeD=1,{},0;
+while wmH <= #hsY do
+    local ngh=Fjm(hsY,wmH);
+    if not ngh then
+        break;
+    end
+    ;
+    wmH=wmH + 1;
+    if ngh < 128 then
+        local MnS=ngh + 1;
+        if wmH + MnS - 1 > #hsY then
+            return nil;
+        end
+        ;
+        for XNC=0,MnS - 1 do
+            BeD=BeD + 1;
+            igs[BeD]=rTD(Fjm(hsY,wmH + XNC));
+        end
+        ;
+        wmH=wmH + MnS;
+    else
+        local fvD=(ngh - 128) + 3;
+        local gij;
+        gij,wmH=(dvI.ww)(dvI,hsY,wmH);
+        if gij == nil then
+            return nil;
+        end
+        ;
+        local fcY=gij + 1;
+        if fcY <= 0 or fcY > BeD then
+            return nil;
+        end
+        ;
+        local mld=BeD - fcY + 1;
+        for ASh=1,fvD do
+            local dgu=igs[mld];
+            if dgu == nil then
+                return nil;
+            end
+            ;
+            BeD=BeD + 1;
+            igs[BeD]=dgu;
+            mld=mld + 1;
+        end
+        ;
+    end
+    ;
+    if JJ and JJ ~= 0 and BeD > JJ then
+        return nil;
+    end
+    ;
+end
+;
+if JJ and JJ ~= 0 and BeD ~= JJ then
+    return nil;
+end
+;
+return Cju(igs);
+end
+)),["XfF"]=((function(eO8,ezn,bcK)return ezn[0x36FF][bcK];
+end
+)),["tRAY"]=({[((("vt8" .. "Dtj") .. "Weu" .. "WC"))]=((function(njO,_pn,Eps,VV)if type(_pn) ~= "table" then
+    return VV or 0;
+end
+;
+VV=VV or 0;
+local ysZ=VV < 0;
+if not ysZ and VV == 0 then
+    return VV;
+end
+;
+if not ysZ then
+    VV=VV - 1;
+end
+;
+local djH=_pn[8];
+if type(djH) == "table" then
+    for nNB=1,#djH do
+        VV=(njO.tRAY)(njO,djH[nNB],Eps,VV);
+        if not ysZ and VV == 0 then
+            break;
+        end
+        ;
+    end
+    ;
+end
+;
+return VV;
+end
+)),[("dp" .. ("MM4" .. "H1C" .. "i06"))]=false})[("vt8" .. (("Dt" .. "jWe") .. "uWC"))],["XJJf"]=((function(aIe,ggq,mjU)local izd,ks4,rNQ,GOa=ggq[0x36FF],ggq[0x6B62],(((mjU[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,mjU[6];
+local dNJ=GOa[1];
+do
+    local qgx,Oh3=(dNJ[0x11F5] or 0),rNQ;
+    izd[Oh3]=qgx;
+    local wjM=ks4 and ks4[Oh3];
+    if wjM then
+        wjM[1]=qgx;
+    end
+    ;
+end
+;
+end
+)),["SOyp"]=((function(oIt,yjF)return yjF[8] or {};
+end
+)),["dc"]=((function(hrj,Npu,nw4)local Nc8=hrj.H;
+hrj.H=Npu or true;
+local _vK=(hrj.RAz)(hrj,Npu,nw4 or 0);
+hrj.H=Nc8;
+return (hrj.md)(hrj,_vK);
+end
+)),["R"]=((function(iIa,pOz,nIo)
+end
+)),["hc"]=((function(pe7,BnC,xTZ)local kjB,zT0,qjG,_T1,ET2,jjK=pe7.y,pe7.SOyp,pe7.RfO,pe7.Xd,pe7.HXS,pe7.ohRX;
+local TT3=zT0(pe7,xTZ);
+if TT3[2] == nil then
+    return;
+end
+;
+local AT4=BnC[0x339B] + 1;
+do
+    local JOn=TT3[1];
+    BnC[0x339B]=AT4 - 1;
+    qjG(pe7,BnC,kjB(pe7,JOn),_T1(pe7,BnC,jjK(pe7,JOn)));
+end
+;
+do
+    local XOs=TT3[2];
+    BnC[0x339B]=AT4 - 0;
+    qjG(pe7,BnC,kjB(pe7,XOs),ET2(pe7,jjK(pe7,XOs)));
+end
+;
+BnC[0x339B]=AT4;
+end
+)),["FbiJ"]=((function(dw8,Oj2)local Dpw,ZOh=(dw8.gUt)(dw8,Oj2,1);
+local Ymd;
+Ymd,ZOh=(dw8.gUt)(dw8,Oj2,ZOh);
+return Dpw or "",Ymd or "";
+end
+)),["aH"]=((function(sIi,lzw,Vmu)local Nj4=lzw[0x3018];
+local Rj7=Nj4 and Nj4[Vmu];
+return Rj7 and Rj7[1] or nil;
+end
+)),["JA"]=((function(dIh,Cxt)return Cxt;
+end
+)),["Kl"]=((function(urE,Gmm)if Gmm == nil or Gmm == "" then
+    return {[0x3EDF]=0,[0x773]="",[0x524F]=0};
+end
+;
+local yzk,pzq=(urE.Dcs)(urE,Gmm,1);
+local Zfr;
+Zfr,pzq=(urE.gUt)(urE,Gmm,pzq);
+local efd;
+efd,pzq=(urE.ww)(urE,Gmm,pzq);
+return {[0x3EDF]=(yzk or 32) - 32,[0x773]=Zfr or "",[0x524F]=(urE.eOAe).bxor(efd or 0,0x3791)};
+end
+)),["AiI"]=((function(_lq,NiR,Aha)if NiR == nil or NiR == "" then
+    return {};
+end
+;
+local aOl=_lq.ivXo;
+local emb,JAw,hl3,IgS,iz9,omq,Bxr=#Aha,aOl.string.byte,(_lq.Neo)(_lq,NiR,Aha),_lq.eOAe,{},1,1;
+while Bxr <= #hl3 do
+    local ntU;
+    ntU,Bxr=(_lq.ww)(_lq,hl3,Bxr);
+    if ntU == nil then
+        break;
+    end
+    ;
+    local dkt=JAw(Aha,((omq - 1) % emb) + 1);
+    local gmC=IgS.bxor((omq * 929) + 0xBA3,dkt);
+    iz9[omq]=IgS.bxor(ntU,gmC);
+    omq=omq + 1;
+end
+;
+return iz9;
+end
+)),["pGR"]=((function(crT,RgL,smz)local eAv,tAb=crT.Xd,crT.RfO;
+local hm_=smz[4];
+if type(hm_) ~= "number" then
+    local lka=(crT.ww)(crT,hm_ or "",1) or 0;
+    hm_=crT.eOAe.bxor(lka,0x2BAD);
+    smz[4]=hm_;
+end
+;
+local Ppj=(((smz[6] or {})[1] or {}));
+if hm_ % 2 == 1 then
+    Ppj=(((smz[6] or {})[3] or {}));
+end
+;
+tAb(crT,RgL,(((smz[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,eAv(crT,RgL,Ppj));
+end
+)),["k"]={[0x4FD]=true,[0x36DE]=true,[0x3D74]=true,[0x3D9A]=true,[0x4146]=true,[0x5C41]=true,[0x5F64]=true,[0x7B54]=true,[0x11F0]=true,[0x165D]=true,[0x254E]=true},["y"]=((function(wIm,Xxm)return (((Xxm[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD;
+end
+)),["pRnu"]=((function(Zxf,DgU,exw)local aAg=Zxf.Cczy;
+aAg(Zxf,DgU,(((((exw[6] or {})[1] or {})))[0x11F5] or 0),DgU[0x36FF][(((exw[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD]);
+end
+)),["TPCR"]=((function(ktt,kz_,txy)local oAk=ktt.RfO;
+local Vpx=txy[4];
+if type(Vpx) ~= "string" then
+    Vpx="";
+end
+;
+local rmE,mrA=1,ktt.eOAe;
+local AdR;
+AdR,rmE=(ktt.ww)(ktt,Vpx,rmE);
+AdR=AdR or 1;
+local Bpz,yIf=(ktt.ww)(ktt,Vpx,rmE or 1);
+Bpz=mrA.bxor(Bpz or 0,0x342B);
+local Nhn;
+Nhn=(ktt.gUt)(ktt,Vpx,yIf or 1);
+if type(Nhn) ~= "string" then
+    Nhn="";
+end
+;
+local Rh8=ktt.AAx;
+local OdD,SiD="",(type(Rh8) == "string" and #Rh8 or 0) % 0x10000;
+local axp,oxv,rl4,enB,n_e,iAq=ktt.ivXo.table.concat,ktt.ivXo.string.byte,#OdD,(0x5288 + Bpz + SiD + (2 * 0xC53E)) % 256,{},ktt.ivXo.string.char;
+for s_t=1,#Nhn do
+    local Shs;
+    if rl4 > 0 then
+        Shs=oxv(OdD,((s_t - 1) % rl4) + 1) or 0;
+    else
+        Shs=(SiD + s_t * 271 + Bpz) % 256;
+    end
+    ;
+    local h_a=(Bpz + SiD * 857 + s_t * 271 + Shs * 349 + enB + 2 * 0xC53E) % 256;
+    local nxg=(0x5288 + s_t * 809 + enB * 271 + 2 * 0x342B) % 256;
+    local mkn,frO=mrA.bxor(h_a,nxg),oxv(Nhn,s_t) or 0;
+    n_e[s_t]=iAq(mrA.bxor(frO,mkn));
+    enB=((enB * 809) + frO + mkn + Shs + s_t * 271 + 2 * 0x9352) % 256;
+end
+;
+local vyh=axp(n_e);
+oAk(ktt,kz_,(((txy[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,ktt.ivXo.string.sub(vyh,AdR,AdR + 1));
+local fks=ktt;
+fks.wyBs=vyh;
+end
+)),["Jx"]=((function(__,GeL,QpT)local r_o,wkh,d_i,JpA,ykr,nAj,XpO,l_n=__.kfb,__.IbBS or ((function()return nil;
+end
+)),__.DBeJ,__.RfO,__.x,GeL[0x2A00],(__.ivXo.next or next),__.OFh;
+local ain,bOE=(QpT[4] or {}),(((QpT[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD;
+if type(ain) ~= "table" or ain[0x3EDF] == nil then
+    ain=(__.Kl)(__,ain or "");
+    QpT[4]=ain;
+end
+;
+local pkd,Elj,vkl=ain[0x3EDF],ain[0x169A],ain[0x524F];
+if Elj == nil then
+    local qzE=ain[0x773] or "";
+    if not (qzE == "") then
+        local bku=r_o(__,qzE);
+        Elj=XpO(bku) and bku or false;
+    else
+        Elj=false;
+    end
+    ;
+    ain[0x169A]=Elj;
+end
+;
+local gkc=GeL[0x7DDB];
+local u_s,kkm=wkh(pkd,vkl,true);
+if not u_s or kkm == nil then
+    JpA(__,GeL,bOE,((function()
+    end
+    )));
+    return;
+end
+;
+local Dh9=gkc[kkm];
+if not Dh9 then
+    local kmM=wkh(pkd,vkl);
+    if not kmM then
+        JpA(__,GeL,bOE,((function()
+        end
+        )));
+        return;
+    end
+    ;
+    if kmM[0x2AE2] ~= nil then
+        Dh9=kmM;
+    else
+        Dh9=d_i(__,kmM[0x503B],kmM[0x443],kmM[0x1FA3]);
+    end
+    ;
+    gkc[kkm]=Dh9;
+end
+;
+local qkf,jzT,xzA,jkw,ZpI,Ruk=GeL[0x36FF],GeL[0x3018],GeL[0x1CA6] or 0x40E26,GeL[0x54D2] or 0xE6ECF,GeL[0x70C6],GeL[0x6B62];
+local Duq;
+local xky={};
+local function c_h(_ts)if not Ruk then
+    Ruk={};
+    GeL[0x6B62]=Ruk;
+end
+;
+local afu=Ruk[_ts];
+if not afu then
+    afu={qkf[ykr(__,_ts)],_ts,qkf,true};
+    Ruk[_ts]=afu;
+end
+;
+return afu;
+end
+;
+if Elj then
+    for rA_,zzO in XpO,Elj do
+        if zzO[1] == 0 then
+            xky[rA_]=c_h(zzO[2]);
+        end
+        ;
+    end
+    ;
+end
+;
+local function zkp(_kv,epN)local Ekb,mtB,Tkg,IdL,Eth={},1,{},{},Dh9[0x1FA3] or 0;
+if Elj then
+    for _zI,EzN in XpO,Elj do
+        local Luj;
+        if not (EzN[1] == 0) then
+            Luj=jzT and jzT[EzN[2]] or nil;
+        else
+            Luj=xky[_zI];
+        end
+        ;
+        if not Luj then
+            Luj={nil,0,nil,false};
+        end
+        ;
+        Ekb[_zI]=Luj;
+    end
+    ;
+end
+;
+for pIw=1,Eth do
+    Tkg[ykr(__,pIw - 1)]=_kv[pIw];
+end
+;
+for tIZ=Eth + 1,epN do
+    IdL[mtB]=_kv[tIZ];
+    mtB=mtB + 1;
+end
+;
+IdL.n=mtB - 1;
+local m_r={[0x36FF]=Tkg,[0x3018]=Ekb,[0x3156]=Dh9[0x27DF],[0x339B]=(jkw - xzA) + 1,[0x54D2]=jkw,[0x1CA6]=xzA,[0x710F]=Eth - 1,[0x2A00]=IdL,[0x70C6]=ZpI,[0x7DDB]=gkc,[738]=Duq,[0x6B62]={}};
+return m_r,Dh9[0x2AE2];
+end
+;
+Duq=((function(...)local f_d,tpS={...},select("#",...);
+local w_l,dAE=zkp(f_d,tpS);
+return l_n(__,w_l,dAE);
+end
+));
+if __.Bqfr then
+    __.Bqfr[Duq]=((function(Akk,Lre)if Akk == __.ZDVy then
+        if Lre ~= nil then
+            ZpI=Lre;
+            return Duq;
+        end
+        ;
+        return ZpI;
+    end
+    ;
+    return zkp(Akk,Lre);
+end
+));
+end
+;
+JpA(__,GeL,bOE,Duq);
+end
+)),["Ry"]=((function(Okq,sxk,Ikj)local y_u=Okq.RfO;
+local DoQ,ii7=(((Ikj[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,(((((Ikj[6] or {})[1] or {})))[0x11F5] or 0);
+if ii7 < DoQ then
+    DoQ,ii7=ii7,DoQ;
+end
+;
+for p_c=DoQ,ii7 do
+    y_u(Okq,sxk,p_c,nil);
+end
+;
+end
+)),["uYHj"]=((function(Urt,wrI,v_m)local b_f,apH=Urt.SOyp,Urt.MH or (Urt.IRzk)(Urt);
+local TzS=b_f(Urt,v_m);
+local byr=#TzS;
+if byr == 0 then
+    return;
+end
+;
+local Cv8,Ttr,opR=Urt.eOAe,wrI[0x339B] - 1,apH;
+local Mv9,ftG=Ttr + byr,Ttr;
+repeat local kuh=TzS[(ftG - Ttr) + 1];
+local HiL=kuh[9];
+if HiL == nil then
+    local ofc=kuh[1] or 0;
+    local Cuz=Cv8.bxor(ofc,0x6F4F) - 0x2690;
+    local uox=(((Cv8.bxor(Cuz,0x63B0) * 713) + 0x14E5F) % 0x1FFFF);
+    uox=((uox * 0xFB3F) + 0x214AC) % 0x1D22D;
+    HiL=opR[uox];
+    if not HiL then
+        return;
+    end
+    ;
+    kuh[9]=HiL;
+end
+;
+wrI[0x339B]=ftG + 1;
+HiL(Urt,wrI,kuh);
+if wrI[0x53F6] then
+    return;
+end
+;
+local ni8=wrI[0x339B];
+if type(ni8) ~= "number" or ni8 < Ttr or ni8 > Mv9 then
+    return;
+end
+;
+ftG=ni8;
+until ftG >= Mv9;
+end
+)),["cM"]=((function(Mu_,prS,FuE)local k_y=Mu_.Xd;
+local dmT=FuE[4];
+if type(dmT) ~= "number" then
+    local hxq=(Mu_.ww)(Mu_,dmT or "",1) or 0;
+    dmT=Mu_.eOAe.bxor(hxq,0x6DA5);
+    FuE[4]=dmT;
+end
+;
+local SdC=prS[0x36FF][(((FuE[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD];
+local Hhh=k_y(Mu_,prS,(((FuE[6] or {})[3] or {})));
+local NN;
+if dmT == 0x66E6 then
+    NN=SdC == Hhh;
+elseif
+dmT == 0x159A then
+    NN=not (SdC > Hhh);
+elseif
+dmT == 0xA30 then
+    NN=not (SdC >= Hhh);
+elseif
+dmT == 0x510F then
+    NN=not (SdC < Hhh);
+elseif
+dmT == 0x511D then
+    NN=not (SdC <= Hhh);
+elseif
+dmT == 0x2EBF then
+    NN=SdC ~= Hhh;
+else
+    error("runtime error",0);
+end
+;
+if NN then
+    do
+        local ifm=(((((FuE[6] or {})[1] or {})))[0x11F5] or 0);
+        local gyd=(prS[0x54D2] or 0xE6ECF) - (prS[0x1CA6] or 0x40E26);
+        prS[0x339B]=gyd + ifm;
+    end
+    ;
+end
+;
+end
+)),["LZ"]=((function(WuT,rxj,q_p)local j_v=WuT.RfO;
+local RiU,nff,spU=WuT.wyBs,WuT.ivXo.string.byte,WuT.eOAe;
+local x_b,z_g,__k,E_q=0,0,0,0;
+if type(RiU) == "string" then
+    x_b=nff(RiU,1) or 0;
+    z_g=nff(RiU,2) or 0;
+    __k=nff(RiU,3) or 0;
+    E_q=nff(RiU,4) or 0;
+end
+;
+local Nkx,dxx=(x_b * 261 + z_g * 257 + 0x49AC) % 0x10000,(__k * 91 + E_q * 131 + 0x3095) % 0x10000;
+local sfw=spU.bxor((Nkx + 0x4377) % 0x10000,dxx);
+local lxz=(x_b * 17 + z_g * 29 + __k * 43 + E_q * 59 + 0x4D25) % 0x10000;
+local ux_=(sfw * 107 + lxz) % 0x10000;
+local iOc=(sfw * 971 + ux_ * 7 + Nkx + 0xF000) % 0x10000;
+local YuA=sfw;
+j_v(WuT,rxj,(((q_p[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,YuA);
+end
+)),["n"]=((function(hpC,Rhr,Skz)local sAx,Hk_=Rhr[0x2A00],hpC.RfO;
+local PuO,Dhd,si9=(((((Skz[6] or {})[1] or {})))[0x11F5] or 0),Rhr[0x2A00],(((Skz[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD;
+local Fbe=Dhd.n or #Dhd;
+if not (PuO < 0) then
+    for vIy=1,PuO do
+        Hk_(hpC,Rhr,si9 + vIy - 1,Dhd[vIy]);
+    end
+    ;
+    Rhr[0x710F]=si9 + PuO - 1;
+else
+    for bIp=1,Fbe do
+        Hk_(hpC,Rhr,si9 + bIp - 1,Dhd[bIp]);
+    end
+    ;
+    Rhr[0x710F]=si9 + Fbe - 1;
+end
+;
+end
+)),["kh"]=((function(hfy,RkE,dl5)local rpM=(hfy.MeKq)(hfy,RkE,0,dl5);
+return (hfy.md)(hfy,rpM);
+end
+)),["iERo"]=((function(SS,LoJ,T_j)local DkT,LkA,A_x,UkO,O_z,CkI=SS.RfO,SS.Xd,SS.SOyp,SS.ohRX,SS.Na,SS.y;
+local I__=A_x(SS,T_j);
+if I__[2] == nil then
+    return;
+end
+;
+local N_E=LoJ[0x339B] + 1;
+do
+    local lAT=I__[1];
+    LoJ[0x339B]=N_E - 1;
+    DkT(SS,LoJ,CkI(SS,lAT),LkA(SS,LoJ,UkO(SS,lAT)));
+end
+;
+do
+    local MkN=I__[2];
+    LoJ[0x339B]=N_E - 0;
+    local VuI=MkN[4];
+    if type(VuI) ~= "number" then
+        local LgC=(SS.ww)(SS,VuI or "",1) or 0;
+        VuI=SS.eOAe.bxor(LgC,0x2BAD);
+        MkN[4]=VuI;
+    end
+    ;
+    local qyu=UkO(SS,MkN);
+    if VuI % 2 == 1 then
+        qyu=O_z(SS,MkN);
+    end
+    ;
+    DkT(SS,LoJ,CkI(SS,MkN),LkA(SS,LoJ,qyu));
+end
+;
+LoJ[0x339B]=N_E;
+end
+)),["Cxk"]=((function(HH,ZZ,BuN)local dpF,Cra,FkS=HH.XfF,HH.RfO,(HH.ivXo.next or next);
+local jaB,cxE,WkH,gso=BuN[4],(((((BuN[6] or {})[1] or {})))[0x11F5] or 0),(((((BuN[6] or {})[3] or {})))[0x11F5] or 0),(((BuN[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD;
+local RR;
+local DiC;
+if not (type(jaB) == "table") then
+    local mxT=1;
+    RR,mxT=(HH.Dcs)(HH,jaB or "",mxT);
+    DiC,mxT=(HH.Dcs)(HH,jaB or "",mxT);
+    jaB={RR or (gso + 2),DiC or (gso + 3)};
+    BuN[4]=jaB;
+    RR=jaB[1];
+    DiC=jaB[2];
+else
+    RR=jaB[1];
+    DiC=jaB[2];
+end
+;
+local tnG,jyc,nOm,ieG=dpF(HH,ZZ,gso + 1),dpF(HH,ZZ,RR),ZZ[0x36FF],dpF(HH,ZZ,gso);
+local function HdM(...)local gIv=select("#",...);
+local Wbt={["n"]=gIv};
+for Yba=1,gIv do
+    Wbt[Yba]=select(Yba,...);
+end
+;
+return Wbt;
+end
+;
+local Lhl;
+if tnG == nil and jyc == nil and type(ieG) ~= "function" then
+    local qmF,ksi,lpW=HH.ivXo.getmetatable or getmetatable,type(ieG),HH.ivXo.rawget or rawget;
+    local uAA=qmF and qmF(ieG);
+    local YkR=uAA and lpW(uAA,"var_1");
+    if YkR ~= nil then
+        local paM,LiM,UoX=YkR(ieG);
+        Cra(HH,ZZ,gso,paM);
+        Cra(HH,ZZ,gso + 1,LiM);
+        Cra(HH,ZZ,RR,UoX);
+        Lhl=HdM(paM(LiM,UoX));
+    elseif
+    ksi == "table" then
+        Cra(HH,ZZ,gso,FkS);
+        Cra(HH,ZZ,gso + 1,ieG);
+        Lhl=HdM(FkS(ieG,nil));
+    else
+        error("attempt to iterate over a " .. ksi .. " value");
+    end
+    ;
+else
+    Lhl=HdM(ieG(tnG,jyc));
+end
+;
+for Pbo=1,cxE do
+    Cra(HH,ZZ,DiC + Pbo - 1,Lhl[Pbo]);
+end
+;
+if Lhl[1] == nil then
+    do
+        local rfp=WkH;
+        local xym=(ZZ[0x54D2] or 0xE6ECF) - (ZZ[0x1CA6] or 0x40E26);
+        ZZ[0x339B]=xym + rfp;
+    end
+    ;
+else
+    Cra(HH,ZZ,RR,Lhl[1]);
+end
+;
+end
+)),["wDkb"]=((function(qsn,hne,RdF)local upY,fxA=qsn.RfO,qsn.ivXo.tonumber;
+local KuH,dfv=(((RdF[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,hne[0x36FF];
+local rnt,CoZ=(((((RdF[6] or {})[3] or {})))[0x11F5] or 0),dfv[KuH];
+local GG,Mo0=RdF[4],dfv[rnt];
+if type(GG) == "table" then
+    GG=GG[0x11F5] or (rnt + 1);
+    RdF[4]=GG;
+elseif
+type(GG) ~= "number" then
+    GG=(qsn.Dcs)(qsn,GG or "",1) or (rnt + 1);
+    RdF[4]=GG;
+end
+;
+local jss=dfv[GG];
+if type(CoZ) ~= "number" or type(Mo0) ~= "number" or type(jss) ~= "number" then
+    local dna=qsn.ivXo.tonumber or tonumber;
+    if type(CoZ) ~= "number" then
+        local jmW=dna(CoZ);
+        if jmW == nil then
+            error("invalid 'for' initial value (number expected, got " .. type(CoZ) .. ")");
+        end
+        ;
+        CoZ=jmW;
+        upY(qsn,hne,KuH,CoZ);
+    end
+    ;
+    if type(Mo0) ~= "number" then
+        local xmY=dna(Mo0);
+        if xmY == nil then
+            error("invalid 'for' limit (number expected, got " .. type(Mo0) .. ")");
+        end
+        ;
+        Mo0=xmY;
+        upY(qsn,hne,rnt,Mo0);
+    end
+    ;
+    if type(jss) ~= "number" then
+        local zmP=dna(jss);
+        if zmP == nil then
+            error("invalid 'for' step (number expected, got " .. type(jss) .. ")");
+        end
+        ;
+        jss=zmP;
+        upY(qsn,hne,GG,jss);
+    end
+    ;
+end
+;
+if (jss > 0 and CoZ > Mo0) or (jss < 0 and CoZ < Mo0) then
+    do
+        local lfb=(((((RdF[6] or {})[1] or {})))[0x11F5] or 0);
+        local _yw=(hne[0x54D2] or 0xE6ECF) - (hne[0x1CA6] or 0x40E26);
+        hne[0x339B]=_yw + lfb;
+    end
+    ;
+end
+;
+end
+)),["UlC"]=((function(Atd,Uhu,neK)local H_A,R_O,mpV=Atd.SJwN,Atd.ivXo.table.concat,Atd.MH or (Atd.IRzk)(Atd);
+local xaG=neK[4];
+if type(xaG) ~= "string" or xaG == "" then
+    return;
+end
+;
+local Gbs=Atd.ivXo;
+local KkM,fpB,D_I,ufg,wpG=Gbs.string.char,(Uhu[0x54D2] or 0xE6ECF) - (Uhu[0x1CA6] or 0x40E26),Gbs.string.byte,Atd.eOAe,Gbs.table.concat;
+local ois=(Uhu[0x339B] or 1) - fpB - 1;
+if ois < 1 then
+    return;
+end
+;
+local ypK,cfk,zaK,Eyy,yxI=ois * 7,{},(((ois + 0x1346) * 121) + 0x524D + 0x5860 + (ois * 31)) % 0x10000,#xaG,Gbs.math.floor;
+for qur=1,Eyy do
+    local _mV,Tlx=D_I(xaG,qur),yxI(zaK / 256);
+    local L_N=(zaK + (qur * 37) + ypK + Tlx) % 256;
+    cfk[qur]=KkM(ufg.bxor(_mV,L_N));
+    zaK=(zaK + (_mV * 23) + (qur * 13) + (ois * 5) + Tlx) % 0x10000;
+end
+;
+if cfk[1] == nil then
+    return;
+end
+;
+local nn=H_A(Atd,wpG(cfk),ois);
+if type(nn) ~= "table" then
+    return;
+end
+;
+neK[1]=nn[1];
+neK[2]=nn[2];
+neK[6]=nn[6];
+neK[4]=nn[4];
+neK[8]=nn[8];
+neK[0x7EF]=nn[0x7EF];
+if neK[0x7EF] then
+    (Atd.kD)(Atd,Uhu,neK,ois);
+end
+;
+(Atd.vplm)(Atd,Uhu,neK);
+neK[9]=nil;
+local Typ=neK[1];
+if Typ == nil then
+    return;
+end
+;
+local mfq=(((ois + 0x3AD9) * 0x6F5) + 0x6F4F) % 0x1FFFF;
+local QuR,JuD=(((ois + 0x2E90) * 513) + 0x189B) % 0xFFFF,ufg.bxor(Typ,0x6F4F) - mfq;
+local XuL=JuD - QuR;
+local Otl=(((ufg.bxor(XuL,0x63B0) * 713) + 0x14E5F) % 0x1FFFF);
+Otl=((Otl * 0xFB3F) + 0x214AC) % 0x1D22D;
+local Bos=mpV[Otl];
+if Bos then
+    local anK=Atd.Vo;
+    if anK then
+        Bos=anK(neK,ois,Otl,Bos) or Bos;
+    end
+    ;
+    neK[9]=Bos;
+    return (Bos)(Atd,Uhu,neK);
+end
+;
+end
+)),["f"]=((function(ZuU,ffj,JkW)local U_S,XkY=ZuU.RfO,ZuU.XfF;
+local Alz,euC=(((((JkW[6] or {})[1] or {})))[0x11F5] or 0),{};
+euC[1]=XkY(ZuU,ffj,Alz + 0);
+euC[2]=XkY(ZuU,ffj,Alz + 1);
+U_S(ZuU,ffj,(((JkW[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD,euC);
+end
+)),["lR"]=((function(kOA,Kbh,ZkP)local Qbr,xsh,OzR,aI0=Kbh[0x36FF],Kbh[0x6B62],ZkP[6],(((ZkP[2] or 0xA46E4) - 0xA46E4) * 0x2E36D) % 0xFFFFD;
+local oI1,iI2=OzR[3],OzR[1];
+do
+    local dhR,Jbd=aI0,Qbr[(iI2[0x11F5] or 0)] + (oI1[0x11F5] or 0);
+    Qbr[dhR]=Jbd;
+    local ekV=xsh and xsh[dhR];
+    if ekV then
+        ekV[1]=Jbd;
+    end
+    ;
+end
+;
+end
+)),["gUt"]=((function(vpJ,tkB,UgM)local fAN=vpJ.ivXo;
+local wAS=fAN.string.sub;
+local yfz;
+yfz,UgM=(vpJ.ww)(vpJ,tkB,UgM);
+if yfz == nil then
+    return nil,UgM;
+end
+;
+local pxN=wAS(tkB,UgM,UgM + yfz - 1);
+return pxN or "",UgM + yfz;
+end
+)),["bQ"]=((function(ww,Fo1,pf_)local yAH,nI3,Xbl,
+
+-- Senior Hub • Sources | https://discord.gg/CaDQtHqZxA
